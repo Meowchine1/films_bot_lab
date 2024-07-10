@@ -8,6 +8,8 @@ import levenstein
 import sqlite3
 import os
 
+DB_NAME = 'user_history_and_stats.db'
+
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 bot = Bot(token=BOT_TOKEN)
@@ -45,7 +47,7 @@ async def process_help_command(message: Message):
     )
 
 
-conn = sqlite3.connect('user_history_and_stats.db')
+conn = sqlite3.connect(DB_NAME)
 cursor = conn.cursor()
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_history (
@@ -63,7 +65,7 @@ conn.close()
 async def show_history(message: Message):
     user_id = message.from_user.id 
 
-    conn = sqlite3.connect('user_history_and_stats.db')
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute('SELECT query, date_time FROM user_history WHERE user_id=?', (user_id,))
     history = cursor.fetchall()
@@ -85,7 +87,7 @@ async def show_history(message: Message):
 async def show_stats(message: Message):
     user_id = message.from_user.id  
 
-    conn = sqlite3.connect('user_history_and_stats.db')
+    conn = sqlite3.connect(DB)
     cursor = conn.cursor()
     cursor.execute('SELECT query, COUNT(query) ' 
                    'FROM user_history WHERE user_id=? '
@@ -135,7 +137,7 @@ async def send_echo(message: Message):
         if resp:
             await message.answer_photo(link)
 
-            conn = sqlite3.connect('user_history_and_stats.db')
+            conn = sqlite3.connect(DB)
             cursor = conn.cursor()
             cursor.execute('INSERT INTO user_history (user_id, query, date_time) VALUES (?, ?, DATETIME("now"))',
                            (message.from_user.id, message_text))
